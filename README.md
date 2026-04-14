@@ -65,23 +65,6 @@ The app will be available at `http://localhost:3000`
 - `npm run clean` - Remove dist directory
 - `npm run lint` - Type check with TypeScript
 
-## Project Structure
-
-```
-src/
-├── components/
-│   ├── Editor.tsx      # Main markdown editor component
-│   ├── Preview.tsx     # Live preview component
-│   └── Sidebar.tsx     # Navigation sidebar
-├── utils/
-│   ├── cn.ts          # Class name utility
-│   └── storage.ts     # Local storage management
-├── types.ts           # TypeScript type definitions
-├── App.tsx            # Main app component
-├── main.tsx           # Entry point
-└── index.css          # Global styles
-```
-
 ## Configuration
 
 The project uses Vite for fast development and optimized builds. Key configurations:
@@ -109,7 +92,3 @@ npm run build
 
 This generates optimized production-ready files in the `dist` directory.
 
-
-## Contributing
-
-Contributions are welcome! Feel free to submit issues and pull requests.
