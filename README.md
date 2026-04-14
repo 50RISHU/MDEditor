@@ -7,8 +7,6 @@ A modern, feature-rich Markdown editor built with React, TypeScript, and Vite. C
 - ✨ **Live Preview** - Real-time markdown rendering as you type
 - 📝 **Rich Markdown Support** - GitHub Flavored Markdown (GFM) with all standard extensions
 - 🧮 **LaTeX Math** - Full support for mathematical expressions using KaTeX
-- 🤖 **AI Integration** - Powered by Google Gemini API for intelligent assistance
-- 🎨 **Beautiful UI** - Modern interface with Tailwind CSS and smooth animations
 - 💾 **Local Storage** - Automatically save your work locally
 - ⌨️ **Intuitive Editor** - Responsive sidebar navigation and component-based design
 - 🎯 **Syntax Highlighting** - Clean, readable code formatting
@@ -41,12 +39,6 @@ A modern, feature-rich Markdown editor built with React, TypeScript, and Vite. C
    npm install
    ```
 
-3. Set up environment variables:
-   Create a `.env.local` file in the root directory and add your Gemini API key:
-   ```
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-
 ## Running Locally
 
 Start the development server:
@@ -56,14 +48,6 @@ npm run dev
 ```
 
 The app will be available at `http://localhost:3000`
-
-## Available Scripts
-
-- `npm run dev` - Start development server on port 3000
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run clean` - Remove dist directory
-- `npm run lint` - Type check with TypeScript
 
 ## Configuration
 
