@@ -1,8 +1,17 @@
-import React from 'react';
-import { Note } from '../types';
-import { format } from 'date-fns';
-import { Plus, Search, Trash2, FileDown, FileUp, Moon, Sun, Home } from 'lucide-react';
-import { cn } from '../utils/cn';
+import React, { useMemo } from "react";
+import { Note } from "../types";
+import { format } from "date-fns";
+import {
+  Plus,
+  Search,
+  Trash2,
+  FileDown,
+  FileUp,
+  Moon,
+  Sun,
+  Home,
+} from "lucide-react";
+import { cn } from "../utils/cn";
 
 interface SidebarProps {
   notes: Note[];
@@ -12,7 +21,7 @@ interface SidebarProps {
   onDeleteNote: (id: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   toggleTheme: () => void;
   onExport: () => void;
   onImportClick: () => void;
@@ -29,13 +38,15 @@ export default function Sidebar({
   theme,
   toggleTheme,
   onExport,
-  onImportClick
+  onImportClick,
 }: SidebarProps) {
-
-  const filteredNotes = notes.filter(note => 
-    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredNotes = useMemo(() => {
+    return notes.filter(
+      (note) =>
+        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        note.content.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [notes, searchQuery]);
 
   return (
     <div className="w-64 md:w-80 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 h-full">
@@ -43,21 +54,21 @@ export default function Sidebar({
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold tracking-tight">Notes</h1>
           <div className="flex items-center gap-1">
-            <button 
+            <button
               onClick={() => onSelectNote(null)}
               className="p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
               title="Home (All Notes)"
             >
               <Home size={16} />
             </button>
-            <button 
+            <button
               onClick={toggleTheme}
               className="p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
               title="Toggle theme"
             >
-              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+              {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
             </button>
-            <button 
+            <button
               onClick={onCreateNote}
               className="p-2 rounded-md bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900 hover:opacity-90 transition-opacity"
               title="New Note (Ctrl+N)"
@@ -66,9 +77,12 @@ export default function Sidebar({
             </button>
           </div>
         </div>
-        
+
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+          />
           <input
             type="text"
             placeholder="Search notes..."
@@ -85,20 +99,20 @@ export default function Sidebar({
             No notes found.
           </div>
         ) : (
-          filteredNotes.map(note => (
-            <div 
+          filteredNotes.map((note) => (
+            <div
               key={note.id}
               onClick={() => onSelectNote(note.id)}
               className={cn(
                 "group flex flex-col gap-1 p-3 rounded-lg cursor-pointer transition-colors",
-                activeNoteId === note.id 
-                  ? "bg-zinc-200 dark:bg-zinc-800" 
-                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
+                activeNoteId === note.id
+                  ? "bg-zinc-200 dark:bg-zinc-800"
+                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
               )}
             >
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-sm truncate pr-4">
-                  {note.title || 'Untitled Note'}
+                  {note.title || "Untitled Note"}
                 </h3>
                 <button
                   onClick={(e) => {
@@ -113,9 +127,10 @@ export default function Sidebar({
               </div>
               <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
                 <span className="truncate max-w-[140px]">
-                  {note.content.replace(/[#*`_]/g, '').slice(0, 40) || 'Empty note'}
+                  {note.content.replace(/[#*`_]/g, "").slice(0, 40) ||
+                    "Empty note"}
                 </span>
-                <span>{format(note.updatedAt, 'MMM d')}</span>
+                <span>{format(note.updatedAt, "MMM d")}</span>
               </div>
             </div>
           ))
@@ -124,18 +139,22 @@ export default function Sidebar({
 
       <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-zinc-500">
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={onExport}
             disabled={!activeNoteId}
             className={cn(
               "p-2 rounded-md transition-colors",
-              activeNoteId ? "hover:bg-zinc-200 dark:hover:bg-zinc-800" : "opacity-50 cursor-not-allowed"
+              activeNoteId
+                ? "hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                : "opacity-50 cursor-not-allowed",
             )}
-            title={activeNoteId ? "Export current note" : "Open a note to export"}
+            title={
+              activeNoteId ? "Export current note" : "Open a note to export"
+            }
           >
             <FileDown size={16} />
           </button>
-          <button 
+          <button
             onClick={onImportClick}
             className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-md transition-colors"
             title="Import markdown files"

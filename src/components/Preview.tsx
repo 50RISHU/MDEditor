@@ -4,7 +4,10 @@ import Markdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
+import 'highlight.js/styles/github-dark.css'; // Highlight.js theme
 
 interface PreviewProps {
   note: Note;
@@ -22,7 +25,7 @@ export default function Preview({ note }: PreviewProps) {
       <div className="flex-1 p-6 overflow-y-auto prose prose-zinc dark:prose-invert max-w-none">
         <Markdown
           remarkPlugins={[remarkMath, remarkGfm]}
-          rehypePlugins={[rehypeKatex]}
+          rehypePlugins={[rehypeKatex, rehypeRaw, rehypeHighlight]}
         >
           {note.content}
         </Markdown>
