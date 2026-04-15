@@ -10,6 +10,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
+import remarkBreaks from 'remark-breaks'; // <-- 1. Import remark-breaks
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github-dark.css';
 
@@ -28,7 +29,7 @@ export default function Preview({ note }: PreviewProps) {
       </div>
       <div className="flex-1 p-6 overflow-y-auto prose prose-zinc dark:prose-invert max-w-none">
         <Markdown
-          remarkPlugins={[remarkMath, remarkGfm]}
+          remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} // <-- 2. Add it here
           rehypePlugins={[rehypeKatex, rehypeRaw, rehypeHighlight]}
         >
           {note.content}
