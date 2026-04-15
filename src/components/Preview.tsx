@@ -1,3 +1,7 @@
+/**
+ * Preview Component - Renders markdown with syntax highlighting, math support
+ * Shows word count and formatted preview of note content
+ */
 import React from 'react';
 import { Note } from '../types';
 import Markdown from 'react-markdown';
@@ -7,7 +11,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
-import 'highlight.js/styles/github-dark.css'; // Highlight.js theme
+import 'highlight.js/styles/github-dark.css';
 
 interface PreviewProps {
   note: Note;

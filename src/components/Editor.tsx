@@ -1,3 +1,7 @@
+/**
+ * Editor Component - Markdown editor with formatting toolbar
+ * Supports image upload (paste/drag-drop), markdown formatting
+ */
 import React, { useRef, memo, useCallback } from 'react';
 import { Note } from '../types';
 import { Bold, Italic, List, ListOrdered, Link, Code, Quote, Image as ImageIcon, Highlighter } from 'lucide-react';
@@ -7,7 +11,7 @@ interface EditorProps {
   onUpdate: (id: string, updates: Partial<Note>) => void;
 }
 
-// Memoized toolbar button for performance
+// Memoized toolbar button - prevents unnecessary re-renders
 const ToolbarButton = memo(({ icon: Icon, onClick, title }: { icon: any, onClick: () => void, title: string }) => (
   <button
     onClick={onClick}
@@ -21,14 +25,17 @@ const ToolbarButton = memo(({ icon: Icon, onClick, title }: { icon: any, onClick
 export default function Editor({ note, onUpdate }: EditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Update note title
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onUpdate(note.id, { title: e.target.value });
   };
 
+  // Update note content
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onUpdate(note.id, { content: e.target.value });
   };
 
+  // Insert markdown syntax around selected text
   const insertText = useCallback((before: string, after: string = '') => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -47,7 +54,7 @@ export default function Editor({ note, onUpdate }: EditorProps) {
     }, 0);
   }, [note.id, onUpdate]);
 
-  // Process the image file into a Base64 string
+  // Convert image to base64 and insert markdown image syntax
   const processImageFile = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) return;
 
@@ -60,7 +67,7 @@ export default function Editor({ note, onUpdate }: EditorProps) {
     reader.readAsDataURL(file);
   }, [insertText]);
 
-  // Handle Ctrl+V / Cmd+V
+  // Handle pasted images
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
@@ -74,7 +81,7 @@ export default function Editor({ note, onUpdate }: EditorProps) {
     }
   };
 
-  // Handle Drag & Drop
+  // Handle dropped images
   const handleDrop = (e: React.DragEvent<HTMLTextAreaElement>) => {
     e.preventDefault(); // Prevent opening the image in the browser
     const files = e.dataTransfer.files;
@@ -85,8 +92,9 @@ export default function Editor({ note, onUpdate }: EditorProps) {
     }
   };
 
+  // Allow dropping on textarea
   const handleDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
-    e.preventDefault(); // Necessary to allow dropping
+    e.preventDefault();
   };
 
   return (

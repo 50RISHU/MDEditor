@@ -1,3 +1,7 @@
+/**
+ * Sidebar Component - Lists notes with search, filters, theme toggle
+ * Handles note selection, creation, deletion, and import/export
+ */
 import React, { useMemo } from "react";
 import { Note } from "../types";
 import { format } from "date-fns";
@@ -40,6 +44,7 @@ export default function Sidebar({
   onExport,
   onImportClick,
 }: SidebarProps) {
+  // Filter notes by search query (searches title and content)
   const filteredNotes = useMemo(() => {
     return notes.filter(
       (note) =>
@@ -126,7 +131,7 @@ export default function Sidebar({
                 </button>
               </div>
               <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                <span className="truncate max-w-[140px]">
+                <span className="truncate max-w-35">
                   {note.content.replace(/[#*`_]/g, "").slice(0, 40) ||
                     "Empty note"}
                 </span>

@@ -1,3 +1,6 @@
+/**
+ * Storage Utility - Manages localStorage for notes persistence
+ */
 import { Note } from '../types';
 
 const STORAGE_KEY = 'notes-app-data';
@@ -7,6 +10,7 @@ export interface StorageData {
   activeNoteId: string | null;
 }
 
+// Load notes and active note state from localStorage
 export const loadData = (): StorageData => {
   const data = localStorage.getItem(STORAGE_KEY);
   if (data) {
@@ -19,6 +23,7 @@ export const loadData = (): StorageData => {
   return { notes: [], activeNoteId: null };
 };
 
+// Save notes and active note state to localStorage
 export const saveData = (data: StorageData) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };

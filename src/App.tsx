@@ -25,24 +25,24 @@ import {
 import { cn } from "./utils/cn";
 import { format } from "date-fns";
 
+/**
+ * Main App Component - Markdown Note Editor
+ * Manages notes, theme, search, and responsive layout
+ */
 export default function App() {
+  // State management
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  // Mobile responsive state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
-
-  // Desktop responsive state
-  const [desktopViewMode, setDesktopViewMode] = useState<
-    "edit" | "read" | "both"
-  >("both");
+  const [desktopViewMode, setDesktopViewMode] = useState<"edit" | "read" | "both">("both");
   const [isSidebarVisibleDesktop, setIsSidebarVisibleDesktop] = useState(true);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Downloads active note as markdown file
   const handleExport = () => {
     if (!activeNote) return;
     const blob = new Blob([activeNote.content], { type: "text/markdown" });
@@ -56,6 +56,7 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  // Imports markdown files and creates new notes from them
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -81,6 +82,7 @@ export default function App() {
     }
   };
 
+  // Load saved notes and theme on mount
   useEffect(() => {
     const data = loadData();
     setNotes(data.notes);
@@ -94,6 +96,7 @@ export default function App() {
     }
   }, []);
 
+  // Apply theme to DOM and save to localStorage
   useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
@@ -103,6 +106,7 @@ export default function App() {
     localStorage.setItem("notes-theme", theme);
   }, [theme]);
 
+  // Auto-save with 500ms debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       saveData({ notes, activeNoteId });
@@ -110,13 +114,16 @@ export default function App() {
     return () => clearTimeout(timeoutId);
   }, [notes, activeNoteId]);
 
+  // Get current active note
   const activeNote = notes.find((n) => n.id === activeNoteId) || null;
 
+  // Select a note and close mobile sidebar
   const handleSelectNote = useCallback((id: string | null) => {
     setActiveNoteId(id);
     setIsSidebarOpen(false);
   }, []);
 
+  // Create new blank note with default template
   const handleCreateNote = useCallback(() => {
     const newNote: Note = {
       id: uuidv4(),
@@ -131,6 +138,7 @@ export default function App() {
     setMobileTab("edit");
   }, []);
 
+  // Update note content and timestamp
   const handleUpdateNote = useCallback((id: string, updates: Partial<Note>) => {
     setNotes((prev) =>
       prev.map((note) =>
@@ -139,6 +147,7 @@ export default function App() {
     );
   }, []);
 
+  // Delete note and deselect if active
   const handleDeleteNote = useCallback(
     (id: string) => {
       setNotes((prev) => prev.filter((n) => n.id !== id));
@@ -149,6 +158,7 @@ export default function App() {
     [activeNoteId],
   );
 
+  // Keyboard shortcuts: Ctrl+N (new), Ctrl+S (save), Ctrl+D (delete)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -174,6 +184,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [notes, activeNoteId, handleDeleteNote]);
 
+  // Toggle between light and dark theme
   const toggleTheme = () =>
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
 
