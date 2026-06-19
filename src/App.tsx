@@ -343,6 +343,16 @@ export default function App() {
             {!activeNote && <span className="font-semibold">My Notes</span>}
           </div>
 
+          {!activeNote && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              title="Import Notes"
+            >
+              <Upload size={18} />
+            </button>
+          )}
+
           {activeNote && (
             <div className="flex items-center gap-2">
               <div className="flex bg-zinc-200 dark:bg-zinc-800 rounded-lg p-1">
@@ -370,6 +380,13 @@ export default function App() {
                 </button>
               </div>
               <button
+                onClick={handleExport}
+                className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                title="Export Note"
+              >
+                <Download size={18} />
+              </button>
+              <button
                 onClick={() => handleDeleteNote(activeNote.id)}
                 className="p-2 text-zinc-400 hover:text-red-500 transition-colors rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 title="Delete note"
@@ -394,39 +411,48 @@ export default function App() {
             )}
           </div>
           {activeNote && (
-            <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-lg p-1">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-lg p-1">
+                <button
+                  onClick={() => setDesktopViewMode("edit")}
+                  className={cn(
+                    "px-3 py-1.5 text-sm rounded-md flex items-center gap-2 transition-all",
+                    desktopViewMode === "edit"
+                      ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100"
+                      : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300",
+                  )}
+                >
+                  <Edit3 size={14} /> Edit
+                </button>
+                <button
+                  onClick={() => setDesktopViewMode("both")}
+                  className={cn(
+                    "px-3 py-1.5 text-sm rounded-md flex items-center gap-2 transition-all",
+                    desktopViewMode === "both"
+                      ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100"
+                      : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300",
+                  )}
+                >
+                  <Columns size={14} /> Both
+                </button>
+                <button
+                  onClick={() => setDesktopViewMode("read")}
+                  className={cn(
+                    "px-3 py-1.5 text-sm rounded-md flex items-center gap-2 transition-all",
+                    desktopViewMode === "read"
+                      ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100"
+                      : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300",
+                  )}
+                >
+                  <BookOpen size={14} /> Read
+                </button>
+              </div>
               <button
-                onClick={() => setDesktopViewMode("edit")}
-                className={cn(
-                  "px-3 py-1.5 text-sm rounded-md flex items-center gap-2 transition-all",
-                  desktopViewMode === "edit"
-                    ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300",
-                )}
+                onClick={handleExport}
+                className="p-2 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-md transition-colors"
+                title="Export Note"
               >
-                <Edit3 size={14} /> Edit
-              </button>
-              <button
-                onClick={() => setDesktopViewMode("both")}
-                className={cn(
-                  "px-3 py-1.5 text-sm rounded-md flex items-center gap-2 transition-all",
-                  desktopViewMode === "both"
-                    ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300",
-                )}
-              >
-                <Columns size={14} /> Both
-              </button>
-              <button
-                onClick={() => setDesktopViewMode("read")}
-                className={cn(
-                  "px-3 py-1.5 text-sm rounded-md flex items-center gap-2 transition-all",
-                  desktopViewMode === "read"
-                    ? "bg-white dark:bg-zinc-800 shadow-sm text-zinc-900 dark:text-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300",
-                )}
-              >
-                <BookOpen size={14} /> Read
+                <Download size={18} />
               </button>
             </div>
           )}
@@ -463,15 +489,31 @@ export default function App() {
           ) : (
             <div className="flex-1 overflow-y-auto p-4 lg:p-8 bg-zinc-50 dark:bg-zinc-900/50">
               <div className="max-w-5xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8 hidden lg:block">
-                  All Notes
-                </h1>
+                <div className="hidden lg:flex items-center justify-between mb-8">
+                  <h1 className="text-3xl font-bold">
+                    All Notes
+                  </h1>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors font-medium text-sm"
+                  >
+                    <Upload size={16} />
+                    Import Notes
+                  </button>
+                </div>
                 {notes.length === 0 ? (
                   <div className="text-center py-20 text-zinc-500">
                     <div className="text-4xl mb-4">📝</div>
                     <h2 className="text-xl font-medium mb-2">No Notes Yet</h2>
-                    <p>Create your first note to get started.</p>
-                    <p className="hidden lg:block text-sm mt-4 opacity-70">
+                    <p className="mb-6">Create your first note or import existing ones to get started.</p>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg shadow-sm hover:opacity-90 transition-opacity font-medium text-sm"
+                    >
+                      <Upload size={16} />
+                      Import Markdown Files
+                    </button>
+                    <p className="hidden lg:block text-sm mt-6 opacity-70">
                       Ctrl + N to create
                     </p>
                   </div>
