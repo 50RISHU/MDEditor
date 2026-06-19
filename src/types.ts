@@ -10,3 +10,11 @@ export interface Note {
   createdAt: number;   // Timestamp when created
   updatedAt: number;   // Timestamp when last modified
 }
+
+// Todo item structure
+export interface TodoItem {
+  id: string;         // Unique identifier (UUID)
+  text: string;       // Task description
+  completed: boolean; // Completion state
+  createdAt: number;  // Timestamp when created
+}

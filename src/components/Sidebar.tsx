@@ -2,8 +2,9 @@
  * Sidebar Component - Lists notes with search, filters, theme toggle
  * Handles note selection, creation, deletion, and import/export
  */
-import React, { useMemo } from "react";
-import { Note } from "../types";
+import React, { useMemo, useState } from "react";
+import { Note, TodoItem } from "../types";
+import TodoList from "./TodoList";
 import { format } from "date-fns";
 import {
   Plus,
@@ -14,11 +15,13 @@ import {
   Moon,
   Sun,
   Home,
+  X,
 } from "lucide-react";
 import { cn } from "../utils/cn";
 
 interface SidebarProps {
   notes: Note[];
+  todos: TodoItem[];
   activeNoteId: string | null;
   onSelectNote: (id: string | null) => void;
   onCreateNote: () => void;
@@ -29,10 +32,16 @@ interface SidebarProps {
   toggleTheme: () => void;
   onExport: () => void;
   onImportClick: () => void;
+  onAddTodo: (text: string) => void;
+  onToggleTodo: (id: string) => void;
+  onDeleteTodo: (id: string) => void;
+  onUpdateTodo: (id: string, text: string) => void;
+  onCloseMobile?: () => void;
 }
 
 export default function Sidebar({
   notes,
+  todos,
   activeNoteId,
   onSelectNote,
   onCreateNote,
@@ -43,7 +52,14 @@ export default function Sidebar({
   toggleTheme,
   onExport,
   onImportClick,
+  onAddTodo,
+  onToggleTodo,
+  onDeleteTodo,
+  onUpdateTodo,
+  onCloseMobile,
 }: SidebarProps) {
+  const [activeTab, setActiveTab] = useState<"notes" | "todos">("notes");
+
   // Filter notes by search query (searches title and content)
   const filteredNotes = useMemo(() => {
     return notes.filter(
@@ -54,11 +70,41 @@ export default function Sidebar({
   }, [notes, searchQuery]);
 
   return (
-    <div className="w-64 md:w-80 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 h-full">
+    <div className="w-full lg:w-80 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 h-full">
       <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold tracking-tight">Notes</h1>
+          <div className="flex bg-zinc-200 dark:bg-zinc-800 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab("notes")}
+              className={cn(
+                "px-3 py-1 text-sm rounded-md transition-all font-medium",
+                activeTab === "notes"
+                  ? "bg-white dark:bg-zinc-950 shadow-sm text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+              )}
+            >
+              Notes
+            </button>
+            <button
+              onClick={() => setActiveTab("todos")}
+              className={cn(
+                "px-3 py-1 text-sm rounded-md transition-all font-medium",
+                activeTab === "todos"
+                  ? "bg-white dark:bg-zinc-950 shadow-sm text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
+              )}
+            >
+              Tasks
+            </button>
+          </div>
           <div className="flex items-center gap-1">
+            <button
+              onClick={onCloseMobile}
+              className="lg:hidden p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+              title="Close Menu"
+            >
+              <X size={16} />
+            </button>
             <button
               onClick={() => onSelectNote(null)}
               className="p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
@@ -83,22 +129,26 @@ export default function Sidebar({
           </div>
         </div>
 
-        <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
-          />
-          <input
-            type="text"
-            placeholder="Search notes..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-shadow"
-          />
-        </div>
+        {activeTab === "notes" && (
+          <div className="relative">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            />
+            <input
+              type="text"
+              placeholder="Search notes..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-shadow"
+            />
+          </div>
+        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+      {activeTab === "notes" ? (
+        <>
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
         {filteredNotes.length === 0 ? (
           <div className="text-center py-8 text-sm text-zinc-500">
             No notes found.
@@ -124,7 +174,7 @@ export default function Sidebar({
                     e.stopPropagation();
                     onDeleteNote(note.id);
                   }}
-                  className="opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-500 transition-all rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-700"
+                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-500 transition-all rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-700"
                   title="Delete note (Ctrl+D)"
                 >
                   <Trash2 size={14} />
@@ -169,6 +219,18 @@ export default function Sidebar({
         </div>
         <span className="text-xs">{notes.length} notes</span>
       </div>
+        </>
+      ) : (
+        <div className="flex-1 overflow-hidden">
+          <TodoList
+            todos={todos}
+            onAddTodo={onAddTodo}
+            onToggleTodo={onToggleTodo}
+            onDeleteTodo={onDeleteTodo}
+            onUpdateTodo={onUpdateTodo}
+          />
+        </div>
+      )}
     </div>
   );
 }

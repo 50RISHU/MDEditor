@@ -4,7 +4,7 @@ import Sidebar from "./components/Sidebar";
 import Editor from "./components/Editor";
 import Preview from "./components/Preview";
 import { loadData, saveData } from "./utils/storage";
-import { Note } from "./types";
+import { Note, TodoItem } from "./types";
 import {
   Menu,
   Plus,
@@ -32,6 +32,7 @@ import { format } from "date-fns";
 export default function App() {
   // State management
   const [notes, setNotes] = useState<Note[]>([]);
+  const [todos, setTodos] = useState<TodoItem[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -82,10 +83,10 @@ export default function App() {
     }
   };
 
-  // Load saved notes and theme on mount
   useEffect(() => {
     const data = loadData();
     setNotes(data.notes);
+    setTodos(data.todos || []);
     setActiveNoteId(data.activeNoteId);
 
     const savedTheme = localStorage.getItem("notes-theme") as "light" | "dark";
@@ -109,10 +110,10 @@ export default function App() {
   // Auto-save with 500ms debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      saveData({ notes, activeNoteId });
+      saveData({ notes, activeNoteId, todos });
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [notes, activeNoteId]);
+  }, [notes, activeNoteId, todos]);
 
   // Get current active note
   const activeNote = notes.find((n) => n.id === activeNoteId) || null;
@@ -158,6 +159,35 @@ export default function App() {
     [activeNoteId],
   );
 
+  // Todo handlers
+  const handleAddTodo = useCallback((text: string) => {
+    const newTodo: TodoItem = {
+      id: uuidv4(),
+      text,
+      completed: false,
+      createdAt: Date.now(),
+    };
+    setTodos((prev) => [newTodo, ...prev]);
+  }, []);
+
+  const handleToggleTodo = useCallback((id: string) => {
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  }, []);
+
+  const handleDeleteTodo = useCallback((id: string) => {
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+  }, []);
+
+  const handleUpdateTodo = useCallback((id: string, text: string) => {
+    setTodos((prev) =>
+      prev.map((todo) => (todo.id === id ? { ...todo, text } : todo))
+    );
+  }, []);
+
   // Keyboard shortcuts: Ctrl+N (new), Ctrl+S (save), Ctrl+D (delete)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -169,7 +199,7 @@ export default function App() {
             break;
           case "s":
             e.preventDefault();
-            saveData({ notes, activeNoteId });
+            saveData({ notes, activeNoteId, todos });
             break;
           case "d":
             e.preventDefault();
@@ -182,7 +212,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [notes, activeNoteId, handleDeleteNote]);
+  }, [notes, activeNoteId, todos, handleDeleteNote]);
 
   // Toggle between light and dark theme
   const toggleTheme = () =>
@@ -193,7 +223,7 @@ export default function App() {
       {/* Mobile Sidebar Backdrop */}
       {isSidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -201,13 +231,14 @@ export default function App() {
       {/* Sidebar Container */}
       <div
         className={cn(
-          "fixed md:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out",
+          "fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out w-full lg:w-auto",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
-          isSidebarVisibleDesktop ? "md:translate-x-0 md:flex" : "md:hidden",
+          isSidebarVisibleDesktop ? "lg:translate-x-0 lg:flex" : "lg:hidden",
         )}
       >
         <Sidebar
           notes={notes}
+          todos={todos}
           activeNoteId={activeNoteId}
           onSelectNote={handleSelectNote}
           onCreateNote={handleCreateNote}
@@ -218,12 +249,17 @@ export default function App() {
           toggleTheme={toggleTheme}
           onExport={handleExport}
           onImportClick={() => fileInputRef.current?.click()}
+          onAddTodo={handleAddTodo}
+          onToggleTodo={handleToggleTodo}
+          onDeleteTodo={handleDeleteTodo}
+          onUpdateTodo={handleUpdateTodo}
+          onCloseMobile={() => setIsSidebarOpen(false)}
         />
       </div>
 
       {/* Narrow Sidebar (Desktop when main sidebar hidden) */}
       {!isSidebarVisibleDesktop && (
-        <div className="hidden md:flex flex-col items-center py-4 gap-6 w-16 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 h-full flex-shrink-0">
+        <div className="hidden lg:flex flex-col items-center py-4 gap-6 w-16 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 h-full flex-shrink-0">
           <button
             onClick={() => setIsSidebarVisibleDesktop(true)}
             className="p-2.5 rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors"
@@ -287,7 +323,7 @@ export default function App() {
 
       <main className="flex-1 flex flex-col min-w-0 h-full">
         {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20">
+        <div className="lg:hidden flex items-center justify-between p-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -345,7 +381,7 @@ export default function App() {
         </div>
 
         {/* Desktop Header */}
-        <div className="hidden md:flex items-center justify-between p-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+        <div className="hidden lg:flex items-center justify-between p-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
           <div className="flex items-center gap-2">
             {isSidebarVisibleDesktop && (
               <button
@@ -406,8 +442,8 @@ export default function App() {
                   "flex-col min-w-0 border-r border-zinc-200 dark:border-zinc-800 h-full",
                   mobileTab === "edit" ? "flex flex-1" : "hidden",
                   desktopViewMode === "edit" || desktopViewMode === "both"
-                    ? "md:flex md:flex-1"
-                    : "md:hidden",
+                    ? "lg:flex lg:flex-1"
+                    : "lg:hidden",
                 )}
               >
                 <Editor note={activeNote} onUpdate={handleUpdateNote} />
@@ -417,17 +453,17 @@ export default function App() {
                   "flex-col min-w-0 bg-zinc-50 dark:bg-zinc-900/50 h-full",
                   mobileTab === "preview" ? "flex flex-1" : "hidden",
                   desktopViewMode === "read" || desktopViewMode === "both"
-                    ? "md:flex md:flex-1"
-                    : "md:hidden",
+                    ? "lg:flex lg:flex-1"
+                    : "lg:hidden",
                 )}
               >
                 <Preview note={activeNote} />
               </div>
             </>
           ) : (
-            <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-zinc-50 dark:bg-zinc-900/50">
+            <div className="flex-1 overflow-y-auto p-4 lg:p-8 bg-zinc-50 dark:bg-zinc-900/50">
               <div className="max-w-5xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8 hidden md:block">
+                <h1 className="text-3xl font-bold mb-8 hidden lg:block">
                   All Notes
                 </h1>
                 {notes.length === 0 ? (
@@ -435,7 +471,7 @@ export default function App() {
                     <div className="text-4xl mb-4">📝</div>
                     <h2 className="text-xl font-medium mb-2">No Notes Yet</h2>
                     <p>Create your first note to get started.</p>
-                    <p className="hidden md:block text-sm mt-4 opacity-70">
+                    <p className="hidden lg:block text-sm mt-4 opacity-70">
                       Ctrl + N to create
                     </p>
                   </div>
@@ -468,7 +504,7 @@ export default function App() {
           {!activeNote && (
             <button
               onClick={handleCreateNote}
-              className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-30"
+              className="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-30"
             >
               <Plus size={24} />
             </button>
